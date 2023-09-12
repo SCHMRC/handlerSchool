@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <script src="./renderer/renderer.js" defer></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <h1>Hello World!</h1>
+    <div>
+      <form class="form" id="form-url">
+        <input class="input" type="text" name="url" id="url" placeholder="Insert Url">
+        <input class="input" type="text" name="criteria" id="criteria" placeholder="insert criteria">
+      </form>
+    </div>
+    <div>
+      <button class="btn" onclick="test()">Add</button>
+    </div>
+
+    <div class="container">
+      <div class="col">
+        <ul id="lista"></ul>
+
+      </div>
+      <div class="col">
+        <div id="container-body"></div>
+
+      </div>
+
+    </div>
+
+  </body>
+</html>
