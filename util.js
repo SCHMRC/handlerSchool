@@ -9,28 +9,20 @@ function addLi(ul,item){
   li.setAttribute('class','listitem')
 
 
+
   span.addEventListener('click', function() {
     getUrl(item.url).then((result)=>{
       if(item.url.includes('battisti')){
         getBattisti(result,item.criteria)
       }else{
-        console.log(2)
+        console.log('ok')
+        getCopernico(result,item.criteria)
       }
     })
   });
-  cross.addEventListener('click',()=>{
-    let lista = new Array(...JSON.parse(localStorage.getItem('lista')))
-    console.log(lista)
-    let index = lista.findIndex(obj=> obj.url == item.url);
 
-    console.log(index)
-    lista = lista.splice(index,0)
-    console.log(lista)
-    //localStorage.clear()
-    //localStorage.setItem('lista',JSON.stringify(lista))
+  crossFlag(cross,item,dom)
 
-
-  })
 
   span.title = item.criteria
   cross.className = 'cross'
@@ -40,7 +32,29 @@ function addLi(ul,item){
   ul.appendChild(li)
 }
 
-function getUrl(url){
+function crossFlag(cross,item,dom){
+  cross.addEventListener('click',()=>{
+    let lista = new Array(...JSON.parse(localStorage.getItem('lista')))
+    let index = lista.findIndex(obj=> obj.url == item.url);
+    lista.splice(index,1)
+    console.log(lista)
+    localStorage.clear()
+    localStorage.setItem('lista',JSON.stringify(lista))
+    let ul = dom.querySelector('#lista')
+    var delChild = ul.lastChild;
+    while (delChild) {
+      ul.removeChild(delChild);
+      delChild = ul.lastChild;
+      }
+    lista.forEach(item => {
+      addLi(ul,item)
+    });
+
+
+  })
+}
+
+async function getUrl(url){
   return new Promise((resolve,reject)=>{
     const xhr = new XMLHttpRequest();//creo un'istanza XMLHttpRequest
     xhr.open('GET', url);
@@ -62,38 +76,79 @@ function getUrl(url){
 
 function getBattisti(result,criteria){
   let dom = document;
+  let obj = reduceBody(dom,result)
+  let hrefList = obj.hrefList
+  let containerBody = obj.containerBody
+  hrefList.forEach(element => {
+    let x = element.slice(0,element.indexOf('\"'))
+    if(x.includes('.pdf')){
+      containerBody.append(createItem(dom,x))
+    }
+  });
+}
+
+function reduceBody(dom,result){
   let containerBody = dom.getElementById('container-body')
   if(containerBody.childElementCount != 0){
     containerBody.innerHTML = ""
   }
   let res = new String(result)
-  let temp = res.split('href=\"')
-  let hrefList = [];
+  let start = res.indexOf('<body')
+  let end = res.indexOf('</body>')
+  let substring = res.substring(start,end)
+  let hrefList = substring.split('href=\"')// > 1 criterio di divisibilità
+  return {hrefList,containerBody}
+}
 
-  temp.forEach(element => {
-    let x = element.slice(0,element.indexOf('\"'))
-    if(x.includes('.pdf')){
-      let a = dom.createElement('a')
-      a.setAttribute('href',x)
-      a.setAttribute('class','item')
-      a.setAttribute('target','_blank')
-      a.setAttribute('title',x)
-      let lastIndex = x.lastIndexOf('/')
-      a.innerText = x.slice(lastIndex+1,x.length)
-      containerBody.append(a)
-    }
+function createItem(dom,url){
+  let a = dom.createElement('a')
+  a.setAttribute('href',url)
+  a.setAttribute('class','item')
+  a.setAttribute('target','_blank')
+  a.setAttribute('title',url)
+  let lastIndex = url.lastIndexOf('/')
+  a.innerText = url.slice(lastIndex+1,url.length)
+  return a
+}
+
+
+
+function getCopernico(result,criteria){
+  let dom = document;
+  let obj = reduceBody(dom,result)
+  let hrefList = obj.hrefList.filter(item=>item.includes('com-n-'))// > 2 predicato
+
+  const promises = hrefList.map(async (item) => {
+    const i = item.indexOf('"');
+    const url = item.substring(0, i);
+    const response = await getUrl(url);
+    return response;
+  });
+
+  Promise.all(promises)
+  .then((responses) => {
+    responses.forEach((response) => {
+      const start = response.indexOf('<body');
+      const end = response.indexOf('</body>');
+      const bodyContent = response.substring(start, end);
+      const links = bodyContent.split('href="');
+
+      links.forEach((link) => {
+        const x = link.slice(0, link.indexOf('"'));
+        if (x.includes('.pdf') && x.includes('comunicazioni')) {// > 3 predicato
+          obj.containerBody.append(createItem(dom,x));
+        }
+      });
+    });
+  })
+  .catch((error) => {
+    console.error(error);
   });
 
 
 
 
-  //console.log(result.includes('post-'))
-  //let posts = result.querySelectorAll(criteria)
-  // posts = [...posts]
-  // posts.forEach(post => {
-  //   console.log(post.querySelector('h2').childNodes[0].href)
-  // });
-
+  //div.media-content
 }
 
 
