@@ -1,26 +1,42 @@
+
 function addLi(ul,item){
   let dom = document;
   let li = dom.createElement('li');
   let span = dom.createElement('span')
+  let cross = dom.createElement('span')
   span.innerText = item.url
   span.className = 'url'
   li.setAttribute('class','listitem')
 
-  li.addEventListener('click', function() {
+
+  span.addEventListener('click', function() {
     getUrl(item.url).then((result)=>{
       if(item.url.includes('battisti')){
-        console.log(1)
         getBattisti(result,item.criteria)
-
       }else{
         console.log(2)
       }
     })
   });
-  span.title = item.criteria
+  cross.addEventListener('click',()=>{
+    let lista = new Array(...JSON.parse(localStorage.getItem('lista')))
+    console.log(lista)
+    let index = lista.findIndex(obj=> obj.url == item.url);
 
+    console.log(index)
+    lista = lista.splice(index,0)
+    console.log(lista)
+    //localStorage.clear()
+    //localStorage.setItem('lista',JSON.stringify(lista))
+
+
+  })
+
+  span.title = item.criteria
+  cross.className = 'cross'
   li.appendChild(dom.createTextNode('URL: '))
   li.appendChild(span)
+  li.appendChild(cross)
   ul.appendChild(li)
 }
 

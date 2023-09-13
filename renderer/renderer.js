@@ -32,3 +32,5 @@ function storage(obj){
   }
 }
 
+module.exports = {storage}
+

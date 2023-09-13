@@ -48,10 +48,20 @@
 
 .listitem{
   text-align: left;
+  list-style: none;
   border-bottom: 1px solid #dedede;
   padding: 10px;
   cursor: pointer;
   min-width: 250px;
+}
+
+.listitem:hover {
+  background-color: #dedede;
+}
+
+.listitem:hover .cross::after{
+  content: '\274C';
+  float:right;
 }
 
 .item:hover{
